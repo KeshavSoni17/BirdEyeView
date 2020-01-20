@@ -1,5 +1,4 @@
-# import the necessary packages
-from __future__ import print_function
+from flask import Flask, render_template, Response
 from imutils.video import WebcamVideoStream
 from imutils.video import FPS
 import argparse
@@ -10,12 +9,6 @@ import re
 import numpy as np
 import threading
 
-# created a *threaded* video stream, allow the camera sensor to warmup,
-# and start the FPS counter
-print("[INFO] sampling THREADED frames from webcam...")
-
-vs = WebcamVideoStream(src=0).start()
-fps = FPS().start()
 imgHeight = 160
 imgWidth = 160
 screenh = imgHeight*4
@@ -25,13 +18,24 @@ height = 2
 output = [0,0,0,0]
 result = np.zeros((screenh, screenw, 3), np.uint8)
 
+app = Flask(__name__)
 
-# loop over some frames...this time using the threaded stream
-#############################################################################
-#############################################################################
-#############################################################################
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+def getNum(path):
+    if path.endswith("0"):
+        return 0
+    elif path.endswith("1"):
+        return 1
+    elif path.endswith("2"):
+        return 2
+    return 3
+
 def thread_process(vs,num,theta,imgWidth,imgHeight,screenh,screenw):
-    #print("Starting thread: ", num)
     frame = vs.read()
     frame = cv2.resize(frame, (imgWidth,imgHeight), interpolation = cv2.INTER_AREA)
     pts1 = np.float32([(0,imgHeight), (imgWidth,imgHeight), (imgWidth,0), (0,0)])
@@ -76,27 +80,22 @@ def transformation(vs, imgHeight,imgWidth, theta, screenh,screenw):
     threads[3].join()
 
     return result
+ 
+def get_frame():
+    vs = WebcamVideoStream(src=0).start()
+    
+    while True:
+        imgencode = cv2.imencode('.jpg', transformation(vs, imgHeight, imgWidth, theta, screenh, screenw))[1]
+        stringData = imgencode.tostring()
+        yield (b'--frame\r\n'
+               b'Content-Type: text/plain\r\n\r\n' + stringData + b'\r\n')
 
-#############################################################################
-#############################################################################
-#############################################################################
 
-while fps._numFrames<500:
-	# grab the frame from the threaded video stream and resize it
-	# to have a maximum width of 400 pixels
- 
-	# check to see if the frame should be displayed to our screen
-	cv2.imshow("Frame", transformation(vs,imgHeight, imgWidth, theta, screenh, screenw))
-	key = cv2.waitKey(1) & 0xFF
- 
-	# update the FPS counter
-	fps.update()
- 
-# stop the timer and display FPS information
-fps.stop()
-print("[INFO] elasped time: {:.2f}".format(fps.elapsed()))
-print("[INFO] approx. FPS: {:.2f}".format(fps.fps()))
- 
-# do a bit of cleanup
-cv2.destroyAllWindows()
-vs.stop()
+
+@app.route('/calc')
+def calc():
+    return Response(get_frame(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+if __name__ == '__main__':
+    app.run(host='10.8.46.255', debug=True, threaded=True)
