@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <title>BirdEyeView Settings Configuration</title>
+  </head>
+  <body>
+    <h1>BirdEyeView Settings Configuration</h1>
+    <form action="/calibrateCameras" method="POST">
+	<label for="Calibration Image">Calibrate Cameras</label>
+	</p>
+	<input type = "submit" name = "button" value = "North Calibrate" />
+        <input type = "submit" name = "button" value = "South Calibrate" /></p>
+
+	<label for="North Port">North Port</label>
+	<input type = "range" id="northPortID" name="northPort" min="0" max="3" value="0"
+	oninput="amount.value=northPort.value">
+	<output id="amount" name="amount" for="northPort">0</output>
+	<div>
+
+	<label for="South Port">South Port</label>
+	<input type = "range" id="southPortID" name="southPort" min="0" max="3" value="0"
+	oninput="amount1.value=southPort.value">
+	<output id="amount1" name="amount1" for="southPort">0</output>
+	<div>
+
+	<div>
+	</p><input type = "submit" name = "button" value = "Submit" />
+	</div>
+
+	</p>
+	<label>Setup to Calibrate Cameras</label>
+
+	</p>
+	<label>PLEASE NOTE: All changes can be viewed at this link: http://0.0.0.0:5802</label>
+
+	</p>
+	<label>1: Select correct camera port to get proper video feed - Press Submit</label>
+
+	</p>
+	<label>2: Align Printer Paper vertically to the camera's direction</label>
+
+	</p>
+	<label>3: Click calibrate to align specific camera(North or South)</label>
+
+    <form>
+  </body>
+</html>
